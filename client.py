@@ -45,7 +45,7 @@ class Net(nn.Module):
 
 def train_on_batches(worker, batches, model_in, device, lr):
     model = model_in.copy()
-    optimizer = optim.SGD(model.parameters(), lr=lr)  # TODO momentum is not supported at the moment
+    optimizer = optim.SGD(model.parameters(), lr=lr)
 
     model.train()
     model.send(worker)
@@ -60,7 +60,7 @@ def train_on_batches(worker, batches, model_in, device, lr):
         loss.backward()
         optimizer.step()
         if batch_idx % LOG_INTERVAL == 0:
-            loss = loss.get()  # <-- NEW: get the loss back
+            loss = loss.get() 
             loss_local = True
             logger.debug(
                 "Train Worker {}: [{}/{} ({:.0f}%)]\tLoss: {:.6f}".format(
@@ -121,7 +121,7 @@ def train(model, device, federated_train_loader, lr, federate_after_n_batches, a
                 data_for_all_workers = False
         counter += nr_batches
         if not data_for_all_workers:
-            logger.debug("At least one worker ran out of data, stopping.")
+            logger.debug("stopping.")
             break
 
         model = utils.federated_avg(models)
@@ -139,8 +139,8 @@ def test(model, device, test_loader):
         for data, target in test_loader:
             data, target = data.to(device), target.to(device)
             output = model(data)
-            test_loss += f.nll_loss(output, target, reduction="sum").item()  # sum up batch loss
-            pred = output.argmax(1, keepdim=True)  # get the index of the max log-probability
+            test_loss += f.nll_loss(output, target, reduction="sum").item()  
+            pred = output.argmax(1, keepdim=True) 
             correct += pred.eq(target.view_as(pred)).sum().item()
 
     test_loss /= len(test_loader.dataset)
@@ -170,7 +170,6 @@ def define_and_get_arguments(args=sys.argv[1:]):
         help="number of training steps performed on each remote worker " "before averaging",
     )
     parser.add_argument("--lr", type=float, default=0.01, help="learning rate")
-    parser.add_argument("--cuda", action="store_true", help="use cuda")
     parser.add_argument("--seed", type=int, default=1, help="seed used for randomization")
     parser.add_argument("--save_model", action="store_true", help="if set, model will be saved")
     parser.add_argument(
@@ -179,6 +178,7 @@ def define_and_get_arguments(args=sys.argv[1:]):
         action="store_true",
         help="if set, websocket client workers will " "be started in verbose mode",
     )
+    
     parser.add_argument(
         "--use_virtual", action="store_true", help="if set, virtual workers will be used"
     )
@@ -205,7 +205,7 @@ def main():
 
     workers = [alice, bob, charlie]
 
-    use_cuda = args.cuda and torch.cuda.is_available()
+    use_cuda = False
 
     torch.manual_seed(args.seed)
 
