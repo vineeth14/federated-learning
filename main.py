@@ -19,30 +19,31 @@ def getArgs(args=sys.argv[1:]):
 		description="Federated Learning using PySyft Workers"
 	)
 
-	parser.add_argument("--batch_size", type=int, default=64, help="batch size of the training")
+	parser.add_argument("--batch_size", type=int, default=64, help="Batch Size")
 	parser.add_argument("--epochs", type=int, default=2, help="number of epochs to train")
-	parser.add_argument("--lr", type=float, default=1e-2, help="learning rate")
+	parser.add_argument("--lr", type=float, default=.01, help="learning rate")
 	parser.add_argument("--seed", type=int, default=1, help="seed used for random init values")
 	parser.add_argument("--save_model", action="store_true", help="model will be saved")
-	parser.add_argument("--use_virtual", action="store_true", help="virtual workers will be used instead of websocket workers")
+	parser.add_argument("--use_virtual", action="store_true", default=False, help="virtual workers will be used instead of websocket workers")
 	parser.add_argument("--use_cuda", action="store_true", help="use gpu for training")
-
+	parser.add_argument("--verbose", action="store_true", default=True, help="Verbose Output shown")
 	return parser.parse_args(args=args)
 
 def createWorkers(SyftWorker, worker_ports, worker_ids, worker_kwargs):
 	workers = []
 
 	for (id, port) in zip(worker_ids, worker_ports):
+		print(id, port)
 		workers.append(
 			SyftWorker(id=id, port=port, **worker_kwargs)
 		)
-
+		
 	return workers
 
 def main():
 	args = getArgs()
 	hook = sy.TorchHook(torch)
-	SyftWorker = WebsocketClientWorker if args.use_virtual else VirtualWorker
+	SyftWorker = WebsocketClientWorker if not args.use_virtual else VirtualWorker
 
 	worker_kwargs = {'host': 'localhost', 'hook': hook, 'verbose': args.verbose}
 	worker_ports = (8777, 8778, 8779)
@@ -60,8 +61,8 @@ def main():
 
 	model = ClientModel().to(device)
 
-	federated_train_loader = dataset.federated_train_loader
-	test_loader = dataset.federated_train_loader
+	federated_train_loader = client_dataset.GetTrainLoader(workers, args)
+	test_loader = client_dataset.GetTestLoader(workers, args)
 
 	for epoch in range(args.epochs):
 		mylogger.logger.info("Epoch %s/%s", epoch, args.epochs)
@@ -73,5 +74,4 @@ def main():
 		torch.save(model.state_dict(), "fed_model.pt")
 
 if __name__ == '__main__':
-	
 	main()

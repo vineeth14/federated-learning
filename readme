@@ -1,5 +1,5 @@
-python server.py --port 8777 --id alice
-python server.py --port 8778 --id bob
-python server.py --port 8779 --id charlie
+python3 server.py --port 8777 --id alice
+python3 server.py --port 8778 --id bob
+python3 server.py --port 8779 --id charlie
 
-python main.py
+python3 main.py

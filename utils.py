@@ -62,37 +62,37 @@ def TrainOnBatches(worker, batches, model_in, device, lr):
 def FederatedTrainer(model, device, fed_data_loader, lr, fed_after_n_batches):
 	model.train()
 
-	n_batches = fed_after_n_batches
+	nr_batches = fed_after_n_batches
 	data_for_all_workers = True
 	batch_counter = 0
 	models = {}
 	losses = {}
 	
 	iter(fed_data_loader)
-	batches = GetNextBatch(fed_data_loader, n_batches)
+	batches = GetNextBatch(fed_data_loader, nr_batches)
 
 	while True:
-		logger.debug(
-            "Starting training round, batches [{}, {}]".format(counter, counter + nr_batches)
+		mylogger.logger.debug(
+            "Starting training round, batches [{}, {}]".format(batch_counter, batch_counter + nr_batches)
         )
 
 		for worker in batches:
 			curr_batches = batches[worker]
 
 			if curr_batches:
-				models[worker], losses[worker] = TrainOnBatches()
+				models[worker], losses[worker] = TrainOnBatches(worker, curr_batches, model, device, lr)
 			else:
 				data_for_all_workers = False
 		
 		batch_counter += 1
 
 		if not data_for_all_workers:
-			logger.debug("stopping.")
+			mylogger.logger.debug("stopping.")
 
 			break
 
 		model = SyftUtils.federated_avg(models)
-		batches = GetNextBatch(fed_data_loader, n_batches)
+		batches = GetNextBatch(fed_data_loader, nr_batches)
 
 	return model
 
