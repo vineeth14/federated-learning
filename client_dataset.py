@@ -3,6 +3,30 @@ from torchvision import datasets, transforms
 
 import syft as sy
 
+'''
+Dataset:
+
+data = th.rand((10000, 1))*1000
+target = data.sin()
+
+Alices share
+alice_data = data[0:2500]
+alice_target = target[0:2500]
+
+Bobs share
+bob_data = data[2500:5000]
+bob_target = target[2500:5000]
+
+Charlies share
+charlie_data = data[5000:7500]
+charlie_target = target[5000:7500]
+
+Test data
+test_data = data[7500:]
+test_target = target[7500:]
+'''
+
+
 def GetTrainLoader(workers: tuple, args):
 	loader = sy.FederatedDataLoader(
 		datasets.MNIST(
