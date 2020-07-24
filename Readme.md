@@ -3,7 +3,8 @@
 Built a platform that facilitates privacy-preserving over a private, distributed data-set which facilitates Federated Learning and Differential Privacy seamlessly.
 This platform integrates model training using websocket workers.
 
-#### Framework : Pysyft
+#### Framework : Pytorch
+#### Library : Pysyft
 
 ## To Run
 
